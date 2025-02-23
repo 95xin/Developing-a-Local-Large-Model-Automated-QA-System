@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice & Text Question-Answering System</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #50c878;
+            --accent-color: #ff6b6b;
+            --background-color: #f8fafc;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            cursor: default;  /* 恢复默认鼠标 */
+        }
+
+        .cursor-trail {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.2) translateY(-20px);
+            }
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 2em;
+            margin: 0;
+            padding: 15px;
+            grid-column: 1 / -1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            cursor: default;  /* 保持默认鼠标样式 */
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .voice-section {
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .text-section {
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .result-section {
+            border-left: 5px solid var(--accent-color);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        button {
+            cursor: pointer;  /* 改为手型指针 */
+            font-size: 16px;
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        #start {
+            background-color: var(--primary-color);
+        }
+
+        #stop {
+            background-color: var(--accent-color);
+        }
+
+        #generate-text {
+            background-color: var(--secondary-color);
+        }
+
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            cursor: not-allowed;  /* 禁用状态显示禁止图标 */
+            opacity: 0.6;
+        }
+
+        #text-input {
+            cursor: text;  /* 文本输入框显示文本光标 */
+            width: calc(100% - 40px);
+            font-size: 14px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        #text-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 5px rgba(80,200,120,0.3);
+        }
+
+        #output {
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.9);
+            min-height: 200px;
+            text-align: left;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .section-title {
+            color: var(--text-color);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .emoji {
+            position: fixed;
+            pointer-events: none;
+            animation: float-emoji 1.5s ease-out forwards;
+            font-size: 24px;
+            z-index: 1000;
+            opacity: 0;
+            filter: blur(0px);
+        }
+
+        @keyframes float-emoji {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+                filter: blur(4px);
+            }
+            20% {
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% {
+                transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.2);
+                opacity: 0;
+                filter: blur(2px);
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        @keyframes float-cursor {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-5px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voice & Text Question-Answering System</h1>
+        
+        <div class="input-section">
+            <div class="section voice-section">
+                <div class="section-title">🎤 Voice Input</div>
+                <button id="start">Start Recording</button>
+                <button id="stop" disabled>Stop Recording</button>
+            </div>
+
+            <div class="section text-section">
+                <div class="section-title">⌨️ Text Input</div>
+                <input type="text" id="text-input" placeholder="Please enter your question...">
+                <button id="generate-text">Generate Answer</button>
+            </div>
+        </div>
+
+        <div class="section result-section">
+            <div class="section-title">💭 AI Response</div>
+            <div id="output">Waiting for your input...</div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='recorder.js') }}"></script>
+</body>
+</html>
+
+
+
