@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Voice & Text Question-Answering System</title>
+    <title>Voice & Text QA System</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -94,6 +94,33 @@
             border-left: 5px solid var(--accent-color);
             height: 100%;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .recording-status {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .transcript-box {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .translation-box {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            border-left: 3px solid var(--secondary-color);
         }
 
         button {
@@ -152,11 +179,13 @@
             padding: 15px;
             border-radius: 15px;
             background: rgba(255,255,255,0.9);
-            min-height: 200px;
-            text-align: left;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            font-size: 14px;
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .section-title {
@@ -220,17 +249,49 @@
                 transform: translate(-50%, -50%) translateY(-5px);
             }
         }
+
+        .answer-box {
+            margin: 15px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 15px;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .answer-box h3 {
+            color: var(--accent-color);
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffeded;
+        }
+
+        .answer-box p {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--text-color);
+            font-size: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Voice & Text Question-Answering System</h1>
+        <h1>Voice & Text QA System</h1>
         
         <div class="input-section">
             <div class="section voice-section">
                 <div class="section-title">🎤 Voice Input</div>
                 <button id="start">Start Recording</button>
                 <button id="stop" disabled>Stop Recording</button>
+                <div class="recording-status">Recording...</div>
+                <div class="transcript-box" style="display: none;">
+                    <h3>Transcript:</h3>
+                    <p id="transcript-text"></p>
+                </div>
+                <div class="translation-box" style="display: none;">
+                    <h3>Translation:</h3>
+                    <p id="translation-text"></p>
+                </div>
             </div>
 
             <div class="section text-section">
@@ -243,10 +304,159 @@
         <div class="section result-section">
             <div class="section-title">💭 AI Response</div>
             <div id="output">Waiting for your input...</div>
+            <div class="answer-box" style="display: none;">
+                <h3>AI Answer</h3>
+                <p id="answer-text"></p>
+            </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='recorder.js') }}"></script>
+    <script>
+        // 添加emoji相关代码
+        const emojis = ['🌟', '✨', '🌸','🦋', '🌈', '⭐️', '🎈'];
+        let lastEmojiTime = 0;
+        const EMOJI_INTERVAL = 100; // 控制emoji生成的间隔时间（毫秒）
+
+        document.addEventListener('mousemove', (e) => {
+            const currentTime = Date.now();
+            if (currentTime - lastEmojiTime > EMOJI_INTERVAL) {
+                createEmoji(e.clientX, e.clientY);
+                lastEmojiTime = currentTime;
+            }
+        });
+
+        function createEmoji(x, y) {
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji';
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // 随机生成移动方向
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            emoji.style.setProperty('--tx', `${tx}px`);
+            emoji.style.setProperty('--ty', `${ty}px`);
+            
+            emoji.style.left = x + 'px';
+            emoji.style.top = y + 'px';
+            
+            document.body.appendChild(emoji);
+            
+            // 动画结束后移除元素
+            emoji.addEventListener('animationend', () => {
+                document.body.removeChild(emoji);
+            });
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+        const startButton = document.getElementById('start');
+        const stopButton = document.getElementById('stop');
+        const recordingStatus = document.querySelector('.recording-status');
+        const transcriptBox = document.querySelector('.transcript-box');
+        const translationBox = document.querySelector('.translation-box');
+        const transcriptText = document.getElementById('transcript-text');
+        const translationText = document.getElementById('translation-text');
+        const answerBox = document.querySelector('.answer-box');
+        const answerText = document.getElementById('answer-text');
+        const output = document.getElementById('output');
+
+        startButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob);
+
+                    try {
+                        const response = await fetch('/process_audio', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await response.json();
+                        
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                            return;
+                        }
+
+                        transcriptText.textContent = data.text;
+                        transcriptBox.style.display = 'block';
+                        
+                        if (data.translation) {
+                            translationText.textContent = data.translation;
+                            translationBox.style.display = 'block';
+                        }
+
+                        if (data.answer) {
+                            answerText.textContent = data.answer;
+                            answerBox.style.display = 'block';
+                            output.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error processing audio');
+                    }
+                };
+
+                mediaRecorder.start();
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                recordingStatus.style.display = 'block';
+                audioChunks = [];
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error accessing microphone');
+            }
+        });
+
+        stopButton.addEventListener('click', () => {
+            mediaRecorder.stop();
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            recordingStatus.style.display = 'none';
+        });
+
+        const textInput = document.getElementById('text-input');
+        const generateTextBtn = document.getElementById('generate-text');
+
+        generateTextBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            try {
+                const response = await fetch('/process_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: text })
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                answerText.textContent = data.answer;
+                answerBox.style.display = 'block';
+                output.style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating answer');
+            }
+        });
+    </script>
 </body>
 </html>
 
