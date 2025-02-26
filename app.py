@@ -55,17 +55,35 @@ def is_chinese(text):
             return True
     return False
 
+def get_language_name(lang_code):
+    """获取语言代码对应的完整名称"""
+    language_names = {
+        'zh': 'Chinese',
+        'en': 'English',
+        'es': 'Spanish',
+        'fr': 'French',
+        'de': 'German',
+        'ja': 'Japanese',
+        'ko': 'Korean',
+        'ru': 'Russian',
+        'it': 'Italian',
+        'pt': 'Portuguese'
+    }
+    return language_names.get(lang_code, lang_code)
+
 def translate_text(text, target_lang='zh'):
-    """根据输入文本语言自动翻译为中文或英文"""
+    """根据目标语言进行翻译"""
     if not text.strip():
         return "无文本内容"
         
     try:
-        # 检测是否包含中文
-        if is_chinese(text):
-            prompt = f"请将以下中文文本翻译成英文（直接输出翻译结果，不要有任何解释）：\n{text}"
+        # 如果目标是中文，直接翻译成中文
+        if target_lang == 'zh':
+            prompt = f"请将以下文本翻译成Chinese（直接输出翻译结果，不要有任何解释）：\n{text}"
         else:
-            prompt = f"请将以下英文文本翻译成中文（直接输出翻译结果，不要有任何解释）：\n{text}"
+            # 如果目标是其他语言，直接翻译成目标语言
+            target_lang_name = get_language_name(target_lang)
+            prompt = f"请将以下文本翻译成{target_lang_name}（直接输出翻译结果，不要有任何解释）：\n{text}"
             
         result = subprocess.run(
             ["ollama", "run", "deepseek-r1:1.5b"],
@@ -104,14 +122,12 @@ def process_audio():
         if not text:
             raise Exception("speech recognition failed")
 
-        # 获取翻译和AI回答
-        translation = translate_text(text)
-        answer = generate_answer_with_ollama(text)
+        # 只获取翻译，不生成AI回答
+        translation = translate_text(text, 'zh')  # 强制默认翻译为中文
 
         return jsonify({
             "text": text,
-            "translation": translation,
-            "answer": answer
+            "translation": translation
         })
 
     except Exception as e:
@@ -122,6 +138,20 @@ def process_audio():
         for path in [webm_path, wav_path]:
             if os.path.exists(path):
                 os.remove(path)
+
+@app.route("/generate_answer", methods=["POST"])
+def generate_answer():
+    """根据文本生成AI回答"""
+    data = request.get_json()
+    if not data or "text" not in data:
+        return jsonify({"error": "no text received"}), 400
+
+    try:
+        text = data["text"]
+        answer = generate_answer_with_ollama(text)
+        return jsonify({"answer": answer})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/process_text", methods=["POST"])
 def process_text():
@@ -150,10 +180,28 @@ def translate():
 
     try:
         text = data["text"]
-        translated_text = translate_text(text)
+        target_lang = data.get("target_lang", "zh")  # 默认翻译为中文
+        translated_text = translate_text(text, target_lang)
         return jsonify({"translation": translated_text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/get_languages", methods=["GET"])
+def get_languages():
+    """获取支持的语言列表"""
+    languages = [
+        {"code": "zh", "name": "Chinese"},
+        {"code": "en", "name": "English"},
+        {"code": "es", "name": "Spanish"},
+        {"code": "fr", "name": "French"},
+        {"code": "de", "name": "German"},
+        {"code": "ja", "name": "Japanese"},
+        {"code": "ko", "name": "Korean"},
+        {"code": "ru", "name": "Russian"},
+        {"code": "it", "name": "Italian"},
+        {"code": "pt", "name": "Portuguese"}
+    ]
+    return jsonify(languages)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

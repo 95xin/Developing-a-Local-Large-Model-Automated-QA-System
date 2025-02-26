@@ -45,19 +45,18 @@
         .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 15px;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            height: calc(100vh - 40px);
+            padding: 10px;
         }
 
         h1 {
             color: var(--primary-color);
             text-align: center;
-            font-size: 2em;
+            font-size: 1.5em;
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             grid-column: 1 / -1;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
@@ -65,14 +64,20 @@
         .input-section {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
+        }
+
+        .output-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .section {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
 
@@ -82,58 +87,87 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
 
-        .voice-section {
-            border-left: 5px solid var(--primary-color);
-        }
-
-        .text-section {
+        .translation-section {
             border-left: 5px solid var(--secondary-color);
         }
 
         .result-section {
             border-left: 5px solid var(--accent-color);
-            height: 100%;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            position: relative;
         }
 
         .recording-status {
             color: var(--accent-color);
             font-weight: bold;
-            margin: 10px 0;
+            margin: 8px 0;
             display: none;
+            font-size: 0.9em;
         }
 
         .transcript-box {
-            margin: 15px 0;
-            padding: 15px;
+            margin: 10px 0;
+            padding: 10px;
             background: #f5f5f5;
-            border-radius: 10px;
-            border-left: 3px solid var(--primary-color);
+            border-radius: 8px;
+        }
+
+        .transcript-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .transcript-box p {
+            margin-bottom: 15px;
         }
 
         .translation-box {
-            margin: 15px 0;
-            padding: 15px;
+            margin: 10px 0;
+            padding: 10px;
             background: #f0f8ff;
-            border-radius: 10px;
-            border-left: 3px solid var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        .translation-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .translation-box p {
+            margin-bottom: 15px;
+        }
+
+        .language-select {
+            margin: 5px 0;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 150px;
+        }
+
+        .language-select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 5px rgba(80,200,120,0.3);
+        }
+
+        .translation-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
         }
 
         button {
-            cursor: pointer;  /* 改为手型指针 */
-            font-size: 16px;
-            padding: 12px 24px;
-            margin: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px 16px;
+            margin: 5px;
             border: none;
-            border-radius: 15px;
+            border-radius: 8px;
             transition: all 0.3s ease;
             color: white;
             font-weight: bold;
-            backdrop-filter: blur(5px);
         }
 
         #start {
@@ -159,14 +193,12 @@
         }
 
         #text-input {
-            cursor: text;  /* 文本输入框显示文本光标 */
-            width: calc(100% - 40px);
-            font-size: 14px;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            transition: all 0.3s ease;
-            margin-bottom: 10px;
+            width: calc(100% - 24px);
+            padding: 8px 12px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
         }
 
         #text-input:focus {
@@ -176,22 +208,18 @@
         }
 
         #output {
-            padding: 15px;
-            border-radius: 15px;
+            padding: 10px;
+            border-radius: 8px;
             background: rgba(255,255,255,0.9);
             text-align: center;
             font-style: italic;
             color: #666;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
 
         .section-title {
             color: var(--text-color);
-            margin-bottom: 15px;
-            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-size: 1em;
             opacity: 0.9;
         }
 
@@ -251,19 +279,19 @@
         }
 
         .answer-box {
-            margin: 15px 0;
-            padding: 20px;
+            margin: 8px 0;
+            padding: 12px;
             background: #fff;
-            border-radius: 15px;
+            border-radius: 8px;
             border: 1px solid #eee;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .answer-box h3 {
             color: var(--accent-color);
-            margin: 0 0 15px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #ffeded;
+            margin: 0 0 10px 0;
+            padding-bottom: 8px;
+            font-size: 1em;
         }
 
         .answer-box p {
@@ -271,6 +299,59 @@
             line-height: 1.6;
             color: var(--text-color);
             font-size: 15px;
+        }
+
+        .translate-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .translate-btn:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+        }
+
+        .translate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 15px 0;
+            display: block;
+            width: fit-content;
+        }
+
+        .generate-btn:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .voice-section, .text-section {
+            margin-bottom: 10px;
+        }
+
+        .text-section {
+            padding-bottom: 5px;
         }
     </style>
 </head>
@@ -288,10 +369,6 @@
                     <h3>Transcript:</h3>
                     <p id="transcript-text"></p>
                 </div>
-                <div class="translation-box" style="display: none;">
-                    <h3>Translation:</h3>
-                    <p id="translation-text"></p>
-                </div>
             </div>
 
             <div class="section text-section">
@@ -301,12 +378,29 @@
             </div>
         </div>
 
-        <div class="section result-section">
-            <div class="section-title">💭 AI Response</div>
-            <div id="output">Waiting for your input...</div>
-            <div class="answer-box" style="display: none;">
-                <h3>AI Answer</h3>
-                <p id="answer-text"></p>
+        <div class="output-section">
+            <div class="section translation-section">
+                <div class="section-title">🌐 Translation</div>
+                <div class="translation-controls">
+                    <select id="language-select" class="language-select">
+                        <option value="zh" selected>Chinese</option>
+                    </select>
+                    <button id="translate-btn" class="translate-btn">Translate to</button>
+                </div>
+                <div class="translation-box" style="display: none;">
+                    <h3>Translation:</h3>
+                    <p id="translation-text"></p>
+                </div>
+            </div>
+
+            <div class="section result-section">
+                <div class="section-title">💭 AI Response</div>
+                <button id="generate-answer" class="generate-btn">Generate Answer</button>
+                <div id="output">Waiting for your input...</div>
+                <div class="answer-box" style="display: none;">
+                    <h3>AI Answer</h3>
+                    <p id="answer-text"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -389,19 +483,22 @@
                             return;
                         }
 
+                        // 显示识别文本
                         transcriptText.textContent = data.text;
                         transcriptBox.style.display = 'block';
                         
+                        // 显示默认中文翻译
                         if (data.translation) {
                             translationText.textContent = data.translation;
                             translationBox.style.display = 'block';
+                            // 重置语言选择为中文
+                            languageSelect.value = 'zh';
                         }
 
-                        if (data.answer) {
-                            answerText.textContent = data.answer;
-                            answerBox.style.display = 'block';
-                            output.style.display = 'none';
-                        }
+                        // 显示AI回答区域，但不自动生成回答
+                        answerBox.style.display = 'block';
+                        output.style.display = 'none';
+                        answerText.textContent = ''; // 清空之前的回答
                     } catch (error) {
                         console.error('Error:', error);
                         alert('Error processing audio');
@@ -451,6 +548,95 @@
                 answerText.textContent = data.answer;
                 answerBox.style.display = 'block';
                 output.style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating answer');
+            }
+        });
+
+        // 获取语言选择相关元素
+        const languageSelect = document.getElementById('language-select');
+        const translateBtn = document.getElementById('translate-btn');
+
+        // 页面加载时获取支持的语言列表
+        async function loadLanguages() {
+            try {
+                const response = await fetch('/get_languages');
+                const languages = await response.json();
+                
+                // 清空现有选项
+                languageSelect.innerHTML = '';
+                
+                // 添加语言选项
+                languages.forEach(lang => {
+                    const option = document.createElement('option');
+                    option.value = lang.code;
+                    option.textContent = lang.name;
+                    languageSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading languages:', error);
+            }
+        }
+
+        // 页面加载完成后加载语言列表
+        document.addEventListener('DOMContentLoaded', loadLanguages);
+
+        // 修改翻译按钮的点击事件处理
+        translateBtn.addEventListener('click', async () => {
+            const text = transcriptText.textContent;
+            if (!text) return;
+
+            const selectedLang = languageSelect.value;
+            
+            try {
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        target_lang: selectedLang
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                translationText.textContent = data.translation;
+                translationBox.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error translating text');
+            }
+        });
+
+        // 添加生成回答按钮的事件处理
+        const generateAnswerBtn = document.getElementById('generate-answer');
+        generateAnswerBtn.addEventListener('click', async () => {
+            const text = transcriptText.textContent;
+            if (!text) return;
+
+            try {
+                const response = await fetch('/generate_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                answerText.textContent = data.answer;
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error generating answer');
